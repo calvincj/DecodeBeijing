@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import JSZip from "jszip";
 import { api, Document } from "@/lib/api";
 
 const CATEGORY_META: Record<string, { label: string; color: string }> = {
@@ -116,28 +117,46 @@ export default function DocumentsPage() {
   const downloadSelected = async () => {
     if (!selected.size || downloading) return;
     setDownloading(true);
-    const parts: string[] = [];
-    for (const id of Array.from(selected)) {
-      const doc = docs.find((d) => d.id === id);
+
+    const ids = Array.from(selected);
+
+    if (ids.length === 1) {
+      const doc = docs.find((d) => d.id === ids[0]);
       try {
-        const detail = await api.document(id);
-        const sep = "=".repeat(60);
-        parts.push(`${sep}\n${detail.title_zh}\n${detail.meeting_date}\n${sep}\n\n${detail.raw_text_zh}`);
-      } catch {
-        parts.push(`// Could not load document ${doc?.title_zh ?? id}`);
+        const detail = await api.document(ids[0]);
+        const blob = new Blob([detail.raw_text_zh], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${doc?.title_zh ?? "document"}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch { /* ignore */ }
+    } else {
+      const zip = new JSZip();
+      for (const id of ids) {
+        const doc = docs.find((d) => d.id === id);
+        try {
+          const detail = await api.document(id);
+          const filename = `${detail.title_zh}_${detail.meeting_date}.txt`;
+          zip.file(filename, detail.raw_text_zh);
+        } catch {
+          zip.file(`error_${id}.txt`, `Could not load document ${doc?.title_zh ?? id}`);
+        }
       }
+      const blob = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `decode-beijing-${ids.length}-docs.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
-    const blob = new Blob([parts.join("\n\n\n")], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = selected.size === 1
-      ? `${docs.find((d) => d.id === Array.from(selected)[0])?.title_zh ?? "document"}.txt`
-      : `decode-beijing-${selected.size}-docs.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+
     setDownloading(false);
   };
 
