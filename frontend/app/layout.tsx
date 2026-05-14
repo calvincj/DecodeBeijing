@@ -35,9 +35,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Link href="/compare" style={{ color: "var(--muted)" }} className="text-sm hover:opacity-80 transition-opacity">
             Compare
           </Link>
-          <Link href="/candidates" style={{ color: "var(--muted)" }} className="text-sm hover:opacity-80 transition-opacity">
-            Signals
-          </Link>
           <ThemeToggle />
         </nav>
         <main className="flex-1 p-6">{children}</main>
