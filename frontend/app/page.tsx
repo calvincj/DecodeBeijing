@@ -52,7 +52,7 @@ export default async function HomePage() {
               >
                 <div className="flex items-center gap-2 mb-0.5">
                   <span className="text-xl font-medium">{term.term_zh}</span>
-                  {term.first_year && term.first_year >= new Date().getFullYear() - 2 && (
+                  {term.first_year && term.first_year >= new Date().getFullYear() - 4 && (
                     <span className="text-xs font-medium px-1.5 py-0.5 rounded"
                           style={{ background: CATEGORY_COLORS[category] + "33", color: CATEGORY_COLORS[category] }}>
                       new
