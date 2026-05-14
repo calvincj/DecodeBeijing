@@ -50,17 +50,30 @@ export default async function HomePage() {
                 className="block rounded-lg p-4 transition-colors hover:opacity-90"
                 style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
               >
-                <div className="text-xl font-medium mb-0.5">{term.term_zh}</div>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="text-xl font-medium">{term.term_zh}</span>
+                  {term.first_year && term.first_year >= new Date().getFullYear() - 2 && (
+                    <span className="text-xs font-medium px-1.5 py-0.5 rounded"
+                          style={{ background: CATEGORY_COLORS[category] + "33", color: CATEGORY_COLORS[category] }}>
+                      new
+                    </span>
+                  )}
+                </div>
                 <div className="text-sm mb-2" style={{ color: "var(--muted)" }}>
                   {term.term_en ?? "—"}
                 </div>
-                {term.first_year && (
-                  <div className="text-xs" style={{ color: CATEGORY_COLORS[category] }}>
-                    {term.first_year === term.last_year
-                      ? term.first_year
-                      : `${term.first_year}–${term.last_year}`}
-                  </div>
-                )}
+                <div className="flex items-center justify-between text-xs">
+                  <span style={{ color: CATEGORY_COLORS[category] }}>
+                    {term.first_year
+                      ? term.first_year === term.last_year
+                        ? term.first_year
+                        : `${term.first_year}–${term.last_year}`
+                      : ""}
+                  </span>
+                  <span style={{ color: "var(--muted)" }}>
+                    {term.total_mentions} mention{term.total_mentions !== 1 ? "s" : ""}
+                  </span>
+                </div>
               </Link>
             ))}
           </div>
