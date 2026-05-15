@@ -34,21 +34,13 @@ interface DocEntry { title: string; freq: number; spread: boolean; }
 interface YearPoint { date: string; freq: number; docs: DocEntry[]; }
 
 const FILL_TYPES = new Set(["five_year_plan", "plenum"]);
-
-function latestBefore(sortedKeys: string[], year: string): string | null {
-  let result: string | null = null;
-  for (const k of sortedKeys) {
-    if (k <= year) result = k;
-    else break;
-  }
-  return result;
-}
+const FILL_DURATION = 5;
 
 function buildChartData(data: FrequencyPoint[], smooth: boolean): YearPoint[] {
   const sorted = [...data].sort((a, b) => a.meeting_date.localeCompare(b.meeting_date));
 
-  const fillMap     = new Map<string, DocEntry[]>(); // fill-type docs keyed by publication year
-  const regularMap  = new Map<string, DocEntry[]>(); // all other docs keyed by year
+  const fillMap    = new Map<string, DocEntry[]>(); // fill-type docs keyed by publication year
+  const regularMap = new Map<string, DocEntry[]>(); // all other docs keyed by year
   const actualYears = new Set<string>();
 
   for (const p of sorted) {
@@ -66,11 +58,22 @@ function buildChartData(data: FrequencyPoint[], smooth: boolean): YearPoint[] {
 
   if (actualYears.size === 0) return [];
 
-  const nums    = Array.from(actualYears).sort();
-  const minYear = parseInt(nums[0]);
-  const maxYear = parseInt(nums[nums.length - 1]);
-  const fillYears = Array.from(fillMap.keys()).sort();
+  const nums = Array.from(actualYears).sort();
+  let minYear = parseInt(nums[0]);
+  let maxYear = parseInt(nums[nums.length - 1]);
 
+  // Extend range to cover each fill-type doc's full duration, capped at current year
+  if (smooth) {
+    const currentYear = new Date().getFullYear();
+    for (const year of fillMap.keys()) {
+      maxYear = Math.min(
+        Math.max(maxYear, parseInt(year) + FILL_DURATION - 1),
+        currentYear,
+      );
+    }
+  }
+
+  const fillYears = Array.from(fillMap.keys()).sort();
   const allYears: string[] = [];
   for (let y = minYear; y <= maxYear; y++) allYears.push(y.toString());
 
@@ -88,11 +91,16 @@ function buildChartData(data: FrequencyPoint[], smooth: boolean): YearPoint[] {
 
     for (const e of regularMap.get(year) ?? []) addEntry(e);
 
-    if (fillYears.length > 0) {
-      const activeYear = latestBefore(fillYears, year);
-      if (activeYear) {
-        const isSpread = activeYear !== year;
-        for (const e of fillMap.get(activeYear)!) addEntry({ ...e, spread: isSpread });
+    // Window-based fill: a fill-type doc covers [pubYear, pubYear + FILL_DURATION).
+    // All overlapping windows contribute their freq independently.
+    if (smooth && fillYears.length > 0) {
+      const yr = parseInt(year);
+      for (const pubStr of fillYears) {
+        const pub = parseInt(pubStr);
+        if (pub <= yr && yr < pub + FILL_DURATION) {
+          const isSpread = pub !== yr;
+          for (const e of fillMap.get(pubStr)!) addEntry({ ...e, spread: isSpread });
+        }
       }
     }
 
@@ -209,7 +217,7 @@ export default function FrequencyChart({ data, color = "#e85d4a" }: Props) {
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-          <XAxis dataKey="date" tick={{ fill: "var(--muted)", fontSize: 11 }} tickLine={false} />
+          <XAxis dataKey="date" tick={{ fill: "var(--muted)", fontSize: 11 }} tickLine={false} interval={0} />
           <YAxis tick={{ fill: "var(--muted)", fontSize: 11 }} tickLine={false} allowDecimals={false} domain={[0, yMax]} />
           <Tooltip content={(props) => <FreqTooltip {...(props as any)} color={color} />} />
           <ReferenceLine y={0} stroke="var(--border)" />
