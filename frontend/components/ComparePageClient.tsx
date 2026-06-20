@@ -315,7 +315,7 @@ export default function ComparePageClient({ terms }: { terms: Term[] }) {
 
   // ── Build chart data ──────────────────────────────────────────────────────
 
-  const activeSlots = slots.filter(s => s.data.length > 0);
+  const activeSlots = slots.filter(s => !s.loading && s.label.length > 0);
 
   const allYears = new Set<string>();
   const slotMaps = activeSlots.map(s => {
