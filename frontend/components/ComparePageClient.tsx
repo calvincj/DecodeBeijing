@@ -352,8 +352,8 @@ export default function ComparePageClient({ terms }: { terms: Term[] }) {
     <div className="rounded-lg p-4 mb-6"
          style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
 
-      {/* Term selectors */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 12 }}>
+      {/* Term selectors — 2 per row */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 8 }}>
         {slots.map(slot => (
           <TermPicker
             key={slot.id}
@@ -364,16 +364,18 @@ export default function ComparePageClient({ terms }: { terms: Term[] }) {
             canRemove={slots.length > 2}
           />
         ))}
-        {slots.length < SLOT_COLORS.length && (
+      </div>
+      {slots.length < SLOT_COLORS.length && (
+        <div style={{ marginBottom: 12 }}>
           <button onClick={addSlot} style={{
-            alignSelf: "flex-start", padding: "4px 10px", borderRadius: 6,
+            padding: "4px 10px", borderRadius: 6,
             border: "1px dashed var(--border)", background: "transparent",
             color: "var(--muted)", fontSize: 12, cursor: "pointer",
           }}>
             + Add term
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Smooth toggle */}
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 4 }}>

@@ -193,6 +193,17 @@ export default function FrequencyChart({ data, color = "#e85d4a" }: Props) {
     }
   }
 
+  function handleSmoothToggle() {
+    // Capture the current visible range (default or user-dragged) before
+    // smooth changes and chartData gets a new reference — otherwise the
+    // ref is null and the new defaults (which differ between modes) are used.
+    brushYearsRef.current = [
+      chartData[cbStart]?.date ?? chartData[0]?.date ?? "",
+      chartData[cbEnd]?.date  ?? chartData[chartData.length - 1]?.date ?? "",
+    ];
+    setSmooth(s => !s);
+  }
+
   const maxFreq = Math.max(...chartData.map((d) => d.freq), 0);
   const yMax    = maxFreq + 2;
 
@@ -203,7 +214,7 @@ export default function FrequencyChart({ data, color = "#e85d4a" }: Props) {
              onMouseEnter={() => setTipOpen(true)}
              onMouseLeave={() => setTipOpen(false)}>
           <button
-            onClick={() => setSmooth((s) => !s)}
+            onClick={handleSmoothToggle}
             style={{
               fontSize: 11,
               padding: "2px 8px",
