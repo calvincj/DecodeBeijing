@@ -5,7 +5,7 @@ import CustomTermSearch from "@/components/CustomTermSearch";
 const CATEGORY_COLORS: Record<string, string> = {
   ideological:   "#e85d4a",
   macroeconomic: "#fbbf24",
-  industrial:    "#f97316",
+  industrial:    "#a16207",
   livelihood:    "#ec4899",
   environmental: "#22c55e",
   diplomatic:    "#a78bfa",
