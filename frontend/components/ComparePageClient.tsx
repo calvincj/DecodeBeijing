@@ -9,15 +9,19 @@ import { Term, FrequencyPoint, api } from "@/lib/api";
 
 const SLOT_COLORS  = ["#e85d4a", "#4a9eed", "#22c55e", "#fbbf24", "#a78bfa", "#ec4899"];
 
-const CATEGORY_COLORS: Record<string, string> = {
-  ideological:   "#e85d4a",
-  macroeconomic: "#fbbf24",
-  industrial:    "#ec4899",
-  livelihood:    "#f97316",
-  environmental: "#22c55e",
-  diplomatic:    "#a78bfa",
-  technology:    "#4a9eed",
-  other:         "#64748b",
+const CATEGORY_ORDER = [
+  "ideological", "macroeconomic", "industrial", "environmental",
+  "technology", "livelihood", "diplomatic", "other",
+];
+const CATEGORY_LABELS: Record<string, string> = {
+  ideological:   "Ideological",
+  macroeconomic: "Macroeconomic",
+  industrial:    "Industrial",
+  environmental: "Environmental",
+  technology:    "Technology",
+  livelihood:    "Livelihood",
+  diplomatic:    "Diplomatic",
+  other:         "Other",
 };
 const FILL_TYPES   = new Set(["five_year_plan", "plenum"]);
 const FILL_DURATION = 5;
@@ -154,7 +158,7 @@ function TermPicker({
   }
 
   return (
-    <div ref={containerRef} style={{ position: "relative", flex: 1, minWidth: 160 }}>
+    <div ref={containerRef} style={{ position: "relative" }}>
       <div style={{
         display: "flex", alignItems: "center", gap: 6,
         border: "1px solid var(--border)", borderRadius: 6,
@@ -189,29 +193,49 @@ function TermPicker({
         <div style={{
           position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0,
           background: "var(--surface)", border: "1px solid var(--border)",
-          borderRadius: 6, zIndex: 50, maxHeight: 220, overflowY: "auto",
+          borderRadius: 6, zIndex: 50, maxHeight: 260, overflowY: "auto",
         }}>
-          {filtered.map(t => (
-            <button key={t.id} onMouseDown={() => selectTerm(t)} style={{
-              width: "100%", textAlign: "left", padding: "6px 10px",
-              fontSize: 12, background: "transparent", border: "none",
-              borderBottom: "1px solid var(--border)", cursor: "pointer", color: "var(--fg)",
-              display: "flex", alignItems: "center", gap: 8,
-            }}>
-              <span style={{
-                width: 8, height: 8, borderRadius: "50%", flexShrink: 0,
-                background: CATEGORY_COLORS[t.category] ?? "#64748b",
-              }} />
-              <span style={{ fontWeight: 500 }}>{t.term_zh}</span>
-              {t.term_en && (
-                <span style={{ color: "var(--muted)" }}>{t.term_en}</span>
-              )}
-            </button>
-          ))}
-          {filtered.length === 0 && !showCustomOption && (
-            <div style={{ padding: "8px 10px", fontSize: 12, color: "var(--muted)" }}>
-              No matches
-            </div>
+          {q ? (
+            // Flat filtered list when searching
+            filtered.length > 0 ? filtered.map(t => (
+              <button key={t.id} onMouseDown={() => selectTerm(t)} style={{
+                width: "100%", textAlign: "left", padding: "6px 10px",
+                fontSize: 12, background: "transparent", border: "none",
+                borderBottom: "1px solid var(--border)", cursor: "pointer", color: "var(--fg)",
+              }}>
+                <span style={{ fontWeight: 500 }}>{t.term_zh}</span>
+                {t.term_en && <span style={{ color: "var(--muted)", marginLeft: 8 }}>{t.term_en}</span>}
+              </button>
+            )) : !showCustomOption && (
+              <div style={{ padding: "8px 10px", fontSize: 12, color: "var(--muted)" }}>No matches</div>
+            )
+          ) : (
+            // Grouped by category when browsing
+            CATEGORY_ORDER.map(cat => {
+              const catTerms = terms.filter(t => t.category === cat);
+              if (!catTerms.length) return null;
+              return (
+                <div key={cat}>
+                  <div style={{
+                    padding: "6px 10px 3px", fontSize: 10, color: "var(--muted)",
+                    textTransform: "uppercase", letterSpacing: "0.06em",
+                    borderBottom: "1px solid var(--border)",
+                  }}>
+                    {CATEGORY_LABELS[cat]}
+                  </div>
+                  {catTerms.map(t => (
+                    <button key={t.id} onMouseDown={() => selectTerm(t)} style={{
+                      width: "100%", textAlign: "left", padding: "5px 10px 5px 14px",
+                      fontSize: 12, background: "transparent", border: "none",
+                      borderBottom: "1px solid var(--border)", cursor: "pointer", color: "var(--fg)",
+                    }}>
+                      <span style={{ fontWeight: 500 }}>{t.term_zh}</span>
+                      {t.term_en && <span style={{ color: "var(--muted)", marginLeft: 8 }}>{t.term_en}</span>}
+                    </button>
+                  ))}
+                </div>
+              );
+            })
           )}
           {showCustomOption && (
             <button onMouseDown={searchCustom} style={{
@@ -329,7 +353,7 @@ export default function ComparePageClient({ terms }: { terms: Term[] }) {
          style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
 
       {/* Term selectors */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12, alignItems: "flex-start" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 12 }}>
         {slots.map(slot => (
           <TermPicker
             key={slot.id}
@@ -342,7 +366,7 @@ export default function ComparePageClient({ terms }: { terms: Term[] }) {
         ))}
         {slots.length < SLOT_COLORS.length && (
           <button onClick={addSlot} style={{
-            padding: "5px 12px", borderRadius: 6, alignSelf: "center",
+            alignSelf: "flex-start", padding: "4px 10px", borderRadius: 6,
             border: "1px dashed var(--border)", background: "transparent",
             color: "var(--muted)", fontSize: 12, cursor: "pointer",
           }}>
