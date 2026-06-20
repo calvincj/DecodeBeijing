@@ -9,7 +9,9 @@ from app.db import Base
 class TermCategory(str, enum.Enum):
     ideological   = "ideological"
     governance    = "governance"
-    economic      = "economic"
+    macroeconomic = "macroeconomic"
+    industrial    = "industrial"
+    livelihood    = "livelihood"
     environmental = "environmental"
     diplomatic    = "diplomatic"
     technology    = "technology"

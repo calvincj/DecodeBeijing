@@ -5,7 +5,9 @@ import CustomTermSearch from "@/components/CustomTermSearch";
 const CATEGORY_COLORS: Record<string, string> = {
   ideological:   "#e85d4a",
   governance:    "#a78bfa",
-  economic:      "#fbbf24",
+  macroeconomic: "#fbbf24",
+  industrial:    "#f97316",
+  livelihood:    "#fb7185",
   environmental: "#22c55e",
   diplomatic:    "#34d399",
   technology:    "#4a9eed",
@@ -15,7 +17,9 @@ const CATEGORY_COLORS: Record<string, string> = {
 const CATEGORY_LABELS: Record<string, string> = {
   ideological:   "Ideological",
   governance:    "Governance",
-  economic:      "Economic",
+  macroeconomic: "Macroeconomic",
+  industrial:    "Industrial",
+  livelihood:    "Livelihood",
   environmental: "Environmental",
   diplomatic:    "Diplomatic",
   technology:    "Technology",
@@ -39,7 +43,7 @@ export default async function HomePage() {
         </p>
       </div>
 
-      {(["ideological", "governance", "economic", "environmental", "technology", "diplomatic", "other"])
+      {(["ideological", "governance", "macroeconomic", "industrial", "livelihood", "environmental", "technology", "diplomatic", "other"])
     .filter((cat) => byCategory[cat]?.length)
     .map((category) => [category, byCategory[category]] as [string, Term[]])
     .map(([category, catTerms]) => (
