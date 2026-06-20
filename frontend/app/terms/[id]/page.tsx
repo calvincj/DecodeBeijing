@@ -3,11 +3,12 @@ import TermPageClient from "@/components/TermPageClient";
 import Link from "next/link";
 
 const CATEGORY_COLORS: Record<string, string> = {
-  slogan:        "#f97316",
-  policy_phrase: "#a78bfa",
   ideological:   "#e85d4a",
-  economic:      "#fbbf24",
-  diplomatic:    "#34d399",
+  macroeconomic: "#fbbf24",
+  industrial:    "#f97316",
+  livelihood:    "#ec4899",
+  environmental: "#22c55e",
+  diplomatic:    "#a78bfa",
   technology:    "#4a9eed",
   other:         "#64748b",
 };

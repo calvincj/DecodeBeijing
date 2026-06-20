@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Area, AreaChart, Brush,
@@ -161,8 +161,7 @@ export default function FrequencyChart({ data, color = "#e85d4a" }: Props) {
   const preContext = Math.round(activeSpan / 2);
   const brushStart = Math.max(0, firstActive - preContext);
 
-  const [brushRange, setBrushRange] = useState({ start: brushStart, end: brushEnd });
-  useEffect(() => { setBrushRange({ start: brushStart, end: brushEnd }); }, [data]);
+  const labelStep = chartData.length > 30 ? 5 : chartData.length > 15 ? 2 : 1;
 
   const maxFreq = Math.max(...chartData.map((d) => d.freq), 0);
   const yMax    = maxFreq + 2;
@@ -220,7 +219,7 @@ export default function FrequencyChart({ data, color = "#e85d4a" }: Props) {
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
           <XAxis dataKey="date" tick={{ fill: "var(--muted)", fontSize: 11 }} tickLine={false}
-                 interval={Math.max(0, Math.ceil((brushRange.end - brushRange.start + 1) / 8) - 1)} />
+                 interval={0} tickFormatter={(v: string) => parseInt(v) % labelStep === 0 ? v : ""} />
           <YAxis tick={{ fill: "var(--muted)", fontSize: 11 }} tickLine={false} allowDecimals={false} domain={[0, yMax]} />
           <Tooltip content={(props) => <FreqTooltip {...(props as any)} color={color} />} />
           <ReferenceLine y={0} stroke="var(--border)" />
@@ -236,7 +235,6 @@ export default function FrequencyChart({ data, color = "#e85d4a" }: Props) {
                    fill="var(--surface)" travellerWidth={6}
                    startIndex={brushStart} endIndex={brushEnd}
                    tickFormatter={() => ""}
-                   onChange={(r: any) => setBrushRange({ start: r.startIndex, end: r.endIndex })}
             />
           )}
         </AreaChart>
