@@ -32,6 +32,10 @@ export default async function HomePage() {
     return acc;
   }, {});
 
+  for (const cat of Object.keys(byCategory)) {
+    byCategory[cat].sort((a, b) => (b.first_year ?? 0) - (a.first_year ?? 0));
+  }
+
   return (
     <div className="max-w-5xl mx-auto">
       <div className="mb-8">
