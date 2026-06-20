@@ -3,13 +3,23 @@ import { api, Term } from "@/lib/api";
 import CustomTermSearch from "@/components/CustomTermSearch";
 
 const CATEGORY_COLORS: Record<string, string> = {
-  slogan:        "#f97316",
-  policy_phrase: "#a78bfa",
   ideological:   "#e85d4a",
+  governance:    "#a78bfa",
   economic:      "#fbbf24",
+  environmental: "#22c55e",
   diplomatic:    "#34d399",
   technology:    "#4a9eed",
   other:         "#64748b",
+};
+
+const CATEGORY_LABELS: Record<string, string> = {
+  ideological:   "Ideological",
+  governance:    "Governance",
+  economic:      "Economic",
+  environmental: "Environmental",
+  diplomatic:    "Diplomatic",
+  technology:    "Technology",
+  other:         "Other",
 };
 
 export default async function HomePage() {
@@ -29,7 +39,7 @@ export default async function HomePage() {
         </p>
       </div>
 
-      {(["ideological", "economic", "technology", "policy_phrase", "diplomatic", "slogan", "other"])
+      {(["ideological", "governance", "economic", "environmental", "technology", "diplomatic", "other"])
     .filter((cat) => byCategory[cat]?.length)
     .map((category) => [category, byCategory[category]] as [string, Term[]])
     .map(([category, catTerms]) => (
@@ -39,7 +49,7 @@ export default async function HomePage() {
               className="text-xs font-medium px-2 py-0.5 rounded-full uppercase tracking-wider"
               style={{ background: CATEGORY_COLORS[category] + "22", color: CATEGORY_COLORS[category] }}
             >
-              {category.replace("_", " ")}
+              {CATEGORY_LABELS[category] ?? category}
             </span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">

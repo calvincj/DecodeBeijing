@@ -47,7 +47,9 @@ function buildChartData(data: FrequencyPoint[], smooth: boolean): YearPoint[] {
     const year = p.meeting_date.slice(0, 4);
     actualYears.add(year);
 
-    if (smooth && FILL_TYPES.has(p.meeting_category ?? "")) {
+    if (smooth && FILL_TYPES.has(p.meeting_category ?? "") && p.frequency > 0) {
+      // Only smooth fill-type docs where the term actually appears — freq=0 docs
+      // would extend the x-axis into empty years and mask earlier smoothed data
       if (!fillMap.has(year)) fillMap.set(year, []);
       fillMap.get(year)!.push({ title: p.title_zh, freq: p.frequency, spread: false });
     } else {

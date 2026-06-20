@@ -7,10 +7,10 @@ from app.db import Base
 
 
 class TermCategory(str, enum.Enum):
-    slogan        = "slogan"
-    policy_phrase = "policy_phrase"
     ideological   = "ideological"
+    governance    = "governance"
     economic      = "economic"
+    environmental = "environmental"
     diplomatic    = "diplomatic"
     technology    = "technology"
     other         = "other"
