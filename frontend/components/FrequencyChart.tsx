@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Area, AreaChart, Brush,
@@ -173,16 +173,29 @@ export default function FrequencyChart({ data, color = "#e85d4a" }: Props) {
   const chartData = useMemo(() => buildChartData(data), [data]);
 
   // Brush defaults: based on rawFreq so they're stable regardless of smooth mode.
-  // If these don't change between renders, Recharts' useEffect won't re-dispatch
-  // setDataStartEndIndexes and won't move the brush.
   const firstActive = chartData.findIndex(p => p.rawFreq > 0);
   const lastActive  = chartData.reduce((last, p, i) => p.rawFreq > 0 ? i : last, -1);
-  const brushEnd    = lastActive >= 0 ? Math.min(chartData.length - 1, lastActive + 1) : chartData.length - 1;
+  // Always end at the last data point (current year) so users see terms fading to zero
+  const brushEnd    = chartData.length - 1;
   const activeSpan  = Math.max(1, lastActive - firstActive);
   const preContext  = Math.round(activeSpan / 2);
   const brushStart  = Math.max(0, firstActive - preContext);
 
-  const labelStep = chartData.length > 30 ? 5 : chartData.length > 15 ? 2 : 1;
+  // Track the number of years currently visible in the brush window so x-axis
+  // labels adapt: dense when zoomed in, sparse when zoomed out.
+  const [visibleYears, setVisibleYears] = useState(() => brushEnd - brushStart + 1);
+  useEffect(() => {
+    setVisibleYears(brushEnd - brushStart + 1);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chartData]); // reset when term changes (chartData gets new reference)
+
+  function handleBrushChange(r: any) {
+    if (r?.startIndex != null && r?.endIndex != null) {
+      setVisibleYears(r.endIndex - r.startIndex + 1);
+    }
+  }
+
+  const labelStep = visibleYears > 30 ? 5 : visibleYears > 12 ? 2 : 1;
   const maxFreq   = Math.max(...chartData.map(d => smooth ? d.smoothFreq : d.rawFreq), 0);
   const yMax      = maxFreq + 2;
   const dataKey   = smooth ? "smoothFreq" : "rawFreq";
@@ -255,7 +268,7 @@ export default function FrequencyChart({ data, color = "#e85d4a" }: Props) {
             <Brush dataKey="date" height={24} stroke="var(--border)"
                    fill="var(--surface)" travellerWidth={6}
                    startIndex={brushStart} endIndex={brushEnd}
-                   tickFormatter={() => ""}
+                   tickFormatter={() => ""} onChange={handleBrushChange}
             />
           )}
         </AreaChart>
