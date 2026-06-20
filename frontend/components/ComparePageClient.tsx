@@ -8,6 +8,17 @@ import {
 import { Term, FrequencyPoint, api } from "@/lib/api";
 
 const SLOT_COLORS  = ["#e85d4a", "#4a9eed", "#22c55e", "#fbbf24", "#a78bfa", "#ec4899"];
+
+const CATEGORY_COLORS: Record<string, string> = {
+  ideological:   "#e85d4a",
+  macroeconomic: "#fbbf24",
+  industrial:    "#ec4899",
+  livelihood:    "#f97316",
+  environmental: "#22c55e",
+  diplomatic:    "#a78bfa",
+  technology:    "#4a9eed",
+  other:         "#64748b",
+};
 const FILL_TYPES   = new Set(["five_year_plan", "plenum"]);
 const FILL_DURATION = 5;
 
@@ -180,15 +191,20 @@ function TermPicker({
           background: "var(--surface)", border: "1px solid var(--border)",
           borderRadius: 6, zIndex: 50, maxHeight: 220, overflowY: "auto",
         }}>
-          {filtered.slice(0, 25).map(t => (
+          {filtered.map(t => (
             <button key={t.id} onMouseDown={() => selectTerm(t)} style={{
               width: "100%", textAlign: "left", padding: "6px 10px",
               fontSize: 12, background: "transparent", border: "none",
               borderBottom: "1px solid var(--border)", cursor: "pointer", color: "var(--fg)",
+              display: "flex", alignItems: "center", gap: 8,
             }}>
+              <span style={{
+                width: 8, height: 8, borderRadius: "50%", flexShrink: 0,
+                background: CATEGORY_COLORS[t.category] ?? "#64748b",
+              }} />
               <span style={{ fontWeight: 500 }}>{t.term_zh}</span>
               {t.term_en && (
-                <span style={{ color: "var(--muted)", marginLeft: 8 }}>{t.term_en}</span>
+                <span style={{ color: "var(--muted)" }}>{t.term_en}</span>
               )}
             </button>
           ))}
@@ -344,9 +360,9 @@ export default function ComparePageClient({ terms }: { terms: Term[] }) {
             onClick={() => setSmooth(s => !s)}
             style={{
               fontSize: 11, padding: "2px 8px", borderRadius: 9999,
-              border: `1px solid ${smooth ? "#a78bfa" : "var(--border)"}`,
-              background: smooth ? "#a78bfa22" : "transparent",
-              color: smooth ? "#a78bfa" : "var(--muted)", cursor: "pointer",
+              border: `1px solid ${smooth ? "var(--fg)" : "var(--border)"}`,
+              background: smooth ? "var(--bg)" : "transparent",
+              color: smooth ? "var(--fg)" : "var(--muted)", cursor: "pointer",
             }}
           >
             {smooth ? "smoothed" : "raw"}
