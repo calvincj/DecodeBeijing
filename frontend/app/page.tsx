@@ -41,7 +41,7 @@ export default async function HomePage() {
         </p>
       </div>
 
-      {(["ideological", "macroeconomic", "industrial", "livelihood", "environmental", "technology", "diplomatic", "other"])
+      {(["ideological", "macroeconomic", "industrial", "environmental", "technology", "livelihood", "diplomatic", "other"])
     .filter((cat) => byCategory[cat]?.length)
     .map((category) => [category, byCategory[category]] as [string, Term[]])
     .map(([category, catTerms]) => (
