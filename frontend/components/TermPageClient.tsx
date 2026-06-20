@@ -168,7 +168,7 @@ export default function TermPageClient({ term, color, freq, rankings, cachedFram
            style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
         <h2 className="text-sm font-medium mb-4" style={{ color: "var(--muted)" }}>FREQUENCY OVER TIME</h2>
         {filteredFreq.length > 0
-          ? <FrequencyChart data={filteredFreq} color={color} />
+          ? <FrequencyChart data={filteredFreq} color={color} resetKey={term.term_zh} />
           : <p style={{ color: "var(--muted)" }} className="text-sm py-8 text-center">No data for selected conferences</p>
         }
       </div>

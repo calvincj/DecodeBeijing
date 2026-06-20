@@ -58,6 +58,16 @@ export default async function TermPage({ params }: { params: Promise<{ id: strin
         )}
       </div>
 
+      {term.description && (() => {
+        const [enDef, zhDef] = term.description.split("\n\n");
+        return (
+          <div className="mb-6 text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
+            <p>{enDef}</p>
+            {zhDef && <p className="mt-1">{zhDef}</p>}
+          </div>
+        );
+      })()}
+
       <TermPageClient
         term={{ term_zh: term.term_zh, term_en: term.term_en ?? null }}
         color={color}

@@ -10,6 +10,7 @@ import { FrequencyPoint } from "@/lib/api";
 interface Props {
   data: FrequencyPoint[];
   color?: string;
+  resetKey?: string | number; // when this changes, brush position resets (use term id/zh)
 }
 
 function cnOrdToNum(cn: string): number {
@@ -147,7 +148,7 @@ function FreqTooltip({
   );
 }
 
-export default function FrequencyChart({ data, color = "#e85d4a" }: Props) {
+export default function FrequencyChart({ data, color = "#e85d4a", resetKey }: Props) {
   const [smooth, setSmooth]   = useState(true);
   const [tipOpen, setTipOpen] = useState(false);
 
@@ -165,12 +166,12 @@ export default function FrequencyChart({ data, color = "#e85d4a" }: Props) {
 
   // Track brush position as year strings so we can remap across smooth toggling.
   // Using a ref (not state) avoids triggering re-renders when the user drags.
-  const brushYearsRef = useRef<[string, string] | null>(null);
-  const prevDataRef   = useRef(data);
-  if (prevDataRef.current !== data) {
-    // New term — reset saved position so defaults take over
-    prevDataRef.current = data;
-    brushYearsRef.current = null;
+  const brushYearsRef  = useRef<[string, string] | null>(null);
+  const prevResetKeyRef = useRef(resetKey);
+  if (prevResetKeyRef.current !== resetKey) {
+    // Term changed — reset saved position so defaults take over
+    prevResetKeyRef.current = resetKey;
+    brushYearsRef.current   = null;
   }
 
   // Map saved year strings → indices in the current chartData, falling back to defaults
