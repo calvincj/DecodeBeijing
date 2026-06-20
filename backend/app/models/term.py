@@ -8,7 +8,6 @@ from app.db import Base
 
 class TermCategory(str, enum.Enum):
     ideological   = "ideological"
-    governance    = "governance"
     macroeconomic = "macroeconomic"
     industrial    = "industrial"
     livelihood    = "livelihood"
