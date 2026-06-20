@@ -62,14 +62,10 @@ function buildChartData(data: FrequencyPoint[], smooth: boolean): YearPoint[] {
   let minYear = parseInt(nums[0]);
   let maxYear = parseInt(nums[nums.length - 1]);
 
-  // Extend range to cover each fill-type doc's full duration, capped at current year
+  // Extend range to cover each fill-type doc's full duration
   if (smooth) {
-    const currentYear = new Date().getFullYear();
     for (const year of fillMap.keys()) {
-      maxYear = Math.min(
-        Math.max(maxYear, parseInt(year) + FILL_DURATION - 1),
-        currentYear,
-      );
+      maxYear = Math.max(maxYear, parseInt(year) + FILL_DURATION - 1);
     }
   }
 
