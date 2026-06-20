@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import {
   XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Area, AreaChart, Brush,
@@ -163,6 +163,36 @@ export default function FrequencyChart({ data, color = "#e85d4a" }: Props) {
 
   const labelStep = chartData.length > 30 ? 5 : chartData.length > 15 ? 2 : 1;
 
+  // Track brush position as year strings so we can remap across smooth toggling.
+  // Using a ref (not state) avoids triggering re-renders when the user drags.
+  const brushYearsRef = useRef<[string, string] | null>(null);
+  const prevDataRef   = useRef(data);
+  if (prevDataRef.current !== data) {
+    // New term — reset saved position so defaults take over
+    prevDataRef.current = data;
+    brushYearsRef.current = null;
+  }
+
+  // Map saved year strings → indices in the current chartData, falling back to defaults
+  const [cbStart, cbEnd] = useMemo(() => {
+    if (!brushYearsRef.current) return [brushStart, brushEnd];
+    const [sy, ey] = brushYearsRef.current;
+    const si = chartData.findIndex(p => p.date >= sy);
+    const ei = chartData.findIndex(p => p.date >= ey);
+    return [
+      si >= 0 ? si : brushStart,
+      ei >= 0 ? Math.min(chartData.length - 1, ei) : brushEnd,
+    ];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chartData]);  // brushYearsRef is intentionally omitted — it's a ref
+
+  function handleBrushChange(r: any) {
+    if (r?.startIndex != null && r?.endIndex != null &&
+        chartData[r.startIndex] && chartData[r.endIndex]) {
+      brushYearsRef.current = [chartData[r.startIndex].date, chartData[r.endIndex].date];
+    }
+  }
+
   const maxFreq = Math.max(...chartData.map((d) => d.freq), 0);
   const yMax    = maxFreq + 2;
 
@@ -233,8 +263,8 @@ export default function FrequencyChart({ data, color = "#e85d4a" }: Props) {
           {chartData.length > 6 && (
             <Brush dataKey="date" height={24} stroke="var(--border)"
                    fill="var(--surface)" travellerWidth={6}
-                   startIndex={brushStart} endIndex={brushEnd}
-                   tickFormatter={() => ""}
+                   startIndex={cbStart} endIndex={cbEnd}
+                   tickFormatter={() => ""} onChange={handleBrushChange}
             />
           )}
         </AreaChart>
