@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Area, AreaChart, Brush,
@@ -151,7 +151,7 @@ export default function FrequencyChart({ data, color = "#e85d4a" }: Props) {
   const [smooth, setSmooth]   = useState(true);
   const [tipOpen, setTipOpen] = useState(false);
 
-  const chartData = buildChartData(data, smooth);
+  const chartData = useMemo(() => buildChartData(data, smooth), [data, smooth]);
 
   const firstActive = chartData.findIndex((p) => p.freq > 0);
   const lastActive  = chartData.reduce((last, p, i) => (p.freq > 0 ? i : last), -1);
