@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Area, AreaChart, Brush,
@@ -64,12 +64,13 @@ function buildChartData(data: FrequencyPoint[], smooth: boolean): YearPoint[] {
   let minYear = parseInt(nums[0]);
   let maxYear = parseInt(nums[nums.length - 1]);
 
-  // Extend range to cover each fill-type doc's full duration
+  // Extend range for fill-type docs, but never past current year
   if (smooth) {
     for (const year of fillMap.keys()) {
       maxYear = Math.max(maxYear, parseInt(year) + FILL_DURATION - 1);
     }
   }
+  maxYear = Math.min(maxYear, new Date().getFullYear());
 
   const fillYears = Array.from(fillMap.keys()).sort();
   const allYears: string[] = [];
@@ -160,6 +161,9 @@ export default function FrequencyChart({ data, color = "#e85d4a" }: Props) {
   const preContext = Math.round(activeSpan / 2);
   const brushStart = Math.max(0, firstActive - preContext);
 
+  const [brushRange, setBrushRange] = useState({ start: brushStart, end: brushEnd });
+  useEffect(() => { setBrushRange({ start: brushStart, end: brushEnd }); }, [data]);
+
   const maxFreq = Math.max(...chartData.map((d) => d.freq), 0);
   const yMax    = maxFreq + 2;
 
@@ -215,7 +219,8 @@ export default function FrequencyChart({ data, color = "#e85d4a" }: Props) {
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-          <XAxis dataKey="date" tick={{ fill: "var(--muted)", fontSize: 11 }} tickLine={false} interval={0} />
+          <XAxis dataKey="date" tick={{ fill: "var(--muted)", fontSize: 11 }} tickLine={false}
+                 interval={Math.max(0, Math.ceil((brushRange.end - brushRange.start + 1) / 8) - 1)} />
           <YAxis tick={{ fill: "var(--muted)", fontSize: 11 }} tickLine={false} allowDecimals={false} domain={[0, yMax]} />
           <Tooltip content={(props) => <FreqTooltip {...(props as any)} color={color} />} />
           <ReferenceLine y={0} stroke="var(--border)" />
@@ -231,6 +236,7 @@ export default function FrequencyChart({ data, color = "#e85d4a" }: Props) {
                    fill="var(--surface)" travellerWidth={6}
                    startIndex={brushStart} endIndex={brushEnd}
                    tickFormatter={() => ""}
+                   onChange={(r: any) => setBrushRange({ start: r.startIndex, end: r.endIndex })}
             />
           )}
         </AreaChart>
