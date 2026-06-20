@@ -32,8 +32,14 @@ export default async function HomePage() {
     return acc;
   }, {});
 
+  const currentYear = new Date().getFullYear();
   for (const cat of Object.keys(byCategory)) {
-    byCategory[cat].sort((a, b) => (b.first_year ?? 0) - (a.first_year ?? 0));
+    byCategory[cat].sort((a, b) => {
+      const aActive = (a.last_year ?? 0) >= currentYear ? 1 : 0;
+      const bActive = (b.last_year ?? 0) >= currentYear ? 1 : 0;
+      if (bActive !== aActive) return bActive - aActive; // active terms first
+      return (b.first_year ?? 0) - (a.first_year ?? 0); // then newest first
+    });
   }
 
   return (
